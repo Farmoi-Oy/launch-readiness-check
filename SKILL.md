@@ -13,7 +13,7 @@ These are not optional.
 
 1. **Read-only.** Do not edit, create or delete any file except the report. Do not run migrations, deploys, installs, builds or anything that writes to a database or a third-party service.
 2. **Never print a secret in full.** When you find one, show the file, the line and the first 6 characters followed by `…`. The same applies in the report.
-3. **No network calls without permission.** The optional live test in step 5 talks to the user's real backend. Ask first, and only ever send `GET` requests.
+3. **No network calls without permission.** The optional live test in step 5 talks to the user's real backend, and the dependency audit (check O4) contacts the package registry. Ask first. Against the user's backend, only ever send `GET` requests.
 4. **Confirm before you report.** Every finding must point to a file and line you actually read. If you are not sure, say so with the confidence level instead of guessing.
 5. **Say what you could not check.** A short report that is honest about its limits is worth more than a long one that implies the app is safe. Never write that the app "is secure" or "is ready".
 
@@ -81,7 +81,11 @@ Only if the app uses Supabase or Firebase directly from the browser, and only wi
     -H "apikey: <public key>" -H "Authorization: Bearer <public key>"
   ```
   Record only whether rows came back, an empty list, or an error. **Do not print or save the row contents.** A row returned for a table that holds personal or business data is a Critical, Confirmed finding. An empty list proves nothing unless the user confirms the table has data.
-- **Firebase:** only if `firestore.rules` is absent from the repo; otherwise read the rules instead.
+- **Firebase:** only if the rules files are absent from the repo; otherwise read the rules instead. For each collection found in `collection("...")` calls, using the web config `projectId` and `apiKey`:
+  ```
+  curl -s "https://firestore.googleapis.com/v1/projects/<projectId>/databases/(default)/documents/<collection>?pageSize=1&key=<apiKey>"
+  ```
+  For Realtime Database, `curl -s "<databaseURL>/.json?shallow=true"`. Record results the same way as for Supabase.
 
 Never send `POST`, `PATCH`, `PUT` or `DELETE`. Never use a secret or service-role key, even if you found one.
 

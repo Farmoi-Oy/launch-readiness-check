@@ -95,7 +95,8 @@ Correct: role in `app_metadata`, a roles table only the server can write, or the
 - Read every `create policy`:
   - `using (true)` or `with check (true)` on a table that holds anything personal or business-sensitive. Public content (blog posts, product catalogue) may be fine as `select ... using (true)`; writes almost never are.
   - Policies `to anon` or with no `to` clause (defaults to `public`, which includes anon) that allow `insert`, `update` or `delete`.
-  - `for update` without `with check`: a user can move a row to someone else, or change the owner column.
+  - `for update` whose `with check` is looser than its `using` (e.g. `with check (true)`): a user can move a row to someone else, or change the owner column. A missing `with check` is not a finding on its own; Postgres then reuses the `using` condition.
+  - RLS can't limit which columns change. A user who can update their own row can change every column in it (`role`, `plan`, `credits`) unless column grants or a trigger stop them.
   - `for all` policies: check that both `using` and `with check` are right.
   - Conditions that read `auth.jwt() -> 'user_metadata'` or `raw_user_meta_data`: users can edit this. Never base permissions on it.
   - Policies that compare against a column the user can update themselves (e.g. a `role` column on `profiles` with an update policy that doesn't exclude it).
@@ -198,7 +199,7 @@ Outside the code; list for the founder.
 
 ### O4. Dependencies [24]
 
-If a lockfile exists, run the read-only audit for the package manager (`npm audit --omit=dev`, `pnpm audit --prod`, `yarn npm audit`, `bun audit`). If it needs network access and that fails, list it as unchecked. Report high and critical advisories in packages the app actually uses at runtime. Also flag a framework version with a known critical advisory you are aware of.
+If a lockfile exists, ask the user before running the read-only audit for the package manager, because it sends the dependency list to the registry (`npm audit --omit=dev`, `pnpm audit --prod`, `yarn audit --groups dependencies` for Yarn 1, `yarn npm audit --environment production` for Yarn 2+, `bun audit`). If the user declines or the network call fails, list it as unchecked. Report high and critical advisories in packages the app actually uses at runtime. Also flag a framework version with a known critical advisory you are aware of.
 
 ### O5. Other hardening
 

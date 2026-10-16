@@ -16,7 +16,7 @@ It follows the [33-point launch checklist for AI-built apps](https://launchpadst
 ## Safe by design
 
 - **Read-only.** It doesn't change your code. The only file it writes is the report.
-- **No network calls without asking.** One optional test sends read-only requests to your Supabase project with the public key, to see whether tables are readable while logged out. It asks first, and never prints the data.
+- **No network calls without asking.** One optional test sends read-only requests to your Supabase or Firebase backend with the public key, to see whether data is readable while logged out. It asks first, and never prints the data. The dependency audit also asks first, because it contacts your package registry.
 - **Secrets are masked** in the chat and the report.
 
 ## Install
@@ -24,7 +24,7 @@ It follows the [33-point launch checklist for AI-built apps](https://launchpadst
 With the [skills CLI](https://github.com/vercel-labs/skills), from your app's folder:
 
 ```bash
-npx skills add mehran75/launch-readiness-check
+npx skills add Farmoi-Oy/launch-readiness-check
 ```
 
 Or copy this folder by hand:
